@@ -1,0 +1,14 @@
+include ../common.mk
+include vars.mk
+
+
+data/vectors/*.csv: $(strip ${SCRIPT_DIR})/extract_NH_vectors.py
+	python3 "$<" \
+	    --path-to-trajectory="$(strip ${TRAJECTORY_PATH})" \
+	    --path-to-trajectory-reference="$(strip ${REFERENCE_PDB_PATH})" \
+	    --chain-name="$(strip ${CHAIN_NAME})" \
+	    --residue-of-interest="$(strip ${RESIDUE_OF_INTEREST})" \
+	    --filetype="$(strip ${FILETYPE})" \
+	    --pattern="$(strip ${PATTERN})" \
+	    --trajectory-length="$(strip ${TRAJECTORY_LENGTH})" \
+	    --output-directory=data/vectors/
