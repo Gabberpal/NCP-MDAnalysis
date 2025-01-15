@@ -1,3 +1,6 @@
+import csv
+import os
+
 from typing import Callable
 
 from MDAnalysis.analysis.base import AnalysisBase
@@ -21,17 +24,35 @@ class WriteVectorsToCsv(AnalysisBase):
 
         self.selector = selector
         self.filename_provider = filename_provider
+        
+        self.files = []
+        self.atoms = self.selector(self._ag)
 
     def _prepare(self):
+        os.makedirs(self.filename_provider.output_directory, exist_ok=True)
+
+        for atoms in self.atoms:
+            file_name = self.filename_provider(atoms[0], atoms[1])
+            file = open(file_name, 'w')
+            spamwriter = csv.writer(file)
+            spamwriter.writerow(['x', 'y', 'z'])
+            self.files.append(file)
+        
+        self.files_and_atoms = dict.fromkeys(self.files, self.atoms)
+            # file = open(file_name, 'w')
+            # file.write('x,y,z\n')
+            # self.files.append(file_name)
         # called before iteration on the trajectory has begun
         # open csv files to write vectors
-        pass
 
     def _single_frame(self):
+        for file, atoms in self.files_and_atoms.items():
+            spamwriter = csv.writer(file)
+            spamwriter.writerow(atoms[0].position - atoms[1].position)
         # write csv vectors for single frame
-        pass
 
     def _conclude(self):
+        for file in self.files_and_atoms.keys():
+            file.close()
         # called once iteration on the trajectory is finished.
         # close csv files
-        pass

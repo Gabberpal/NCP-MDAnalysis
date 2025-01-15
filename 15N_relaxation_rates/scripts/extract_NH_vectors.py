@@ -14,7 +14,7 @@ class OutputFilenameFormatter:
     def __call__(self, atom_1: Atom, atom_2: Atom):
         return f"{self.output_directory}/" \
                f"{atom_1.chainID}-{atom_1.resid:02d}-{atom_1.resname}" \
-               f".csv"
+               f"-NH.csv"
 
 
 if __name__ == '__main__':
