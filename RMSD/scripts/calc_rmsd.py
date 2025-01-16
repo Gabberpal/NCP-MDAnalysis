@@ -4,6 +4,10 @@ import MDAnalysis as mda
 from MDAnalysis import Universe
 from process_utils.select import get_sec_str_pattern
 
+import os
+import MDAnalysis.transformations as trans
+from glob import glob
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Calculation RMSD')
     parser.add_argument('--path-to-trajectory', required=True)
@@ -20,10 +24,18 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     #  load trajectory
-    u: Universe = ...  # TODO: Implement reading trajectory
+    trj_list = glob(os.path.join(args.path_to_trajectory, "*nc"))
+    trj_list.sort()
+    traj = Universe(args.path_to_reference_pdb,
+                 trj_list[args.trajectory_start:args.trajectory_length + 1 ],
+                 in_memory=True,
+                 in_memory_step=args.frames_per_trajectory_file,
+                 topology_format = "PDB"
+                 )
 
     # set xray reference to calc RMSD
-    xray_reference = mda.Universe(args.path_to_xray_reference)
+    path_to_ref = args.path_to_xray_reference_pdb
+    ref_trj = mda.Universe(path_to_ref, topology_format="PDB")
 
     # set pattern to select CA atoms from secondary structure
     protein_chains = "A", "B", "C", "D", "E", "F", "G", "H"
@@ -37,8 +49,14 @@ if __name__ == '__main__':
     ...
 
     # transform trajectory
-    # TODO:
-    ...
+    atoms = u.atoms
+    transforms = [
+        trans.NoJump(),
+        trans.center_in_box(atoms),
+        trans.wrap(atoms, compound="segments"),
+        trans.fit_rot_trans(atoms, ref_trj)
+    ]
+    u.trajectory.add_transformations(*transforms)
 
     # calculate and save RMSD data
     # TODO:
