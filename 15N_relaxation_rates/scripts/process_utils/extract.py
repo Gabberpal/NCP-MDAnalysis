@@ -29,30 +29,27 @@ class WriteVectorsToCsv(AnalysisBase):
         self.atoms = self.selector(self._ag)
 
     def _prepare(self):
-        os.makedirs(self.filename_provider.output_directory, exist_ok=True)
-
-        for atoms in self.atoms:
-            file_name = self.filename_provider(atoms[0], atoms[1])
-            file = open(file_name, 'w')
-            spamwriter = csv.writer(file)
-            spamwriter.writerow(['x', 'y', 'z'])
-            self.files.append(file)
-        
-        self.files_and_atoms = dict.fromkeys(self.files, self.atoms)
-            # file = open(file_name, 'w')
-            # file.write('x,y,z\n')
-            # self.files.append(file_name)
         # called before iteration on the trajectory has begun
         # open csv files to write vectors
+        os.makedirs(self.filename_provider.output_directory, exist_ok=True)
+        for atoms in self.atoms:
+            atom1, atom2 = atoms[0], atoms[1]
+            file_name = self.filename_provider(atom1, atom2)
+            file = open(file_name, 'w')
+            csv_writer = csv.writer(file)
+            csv_writer.writerow(['x', 'y', 'z'])
+            self.files.append(file)
+        self.files_and_atoms = dict(zip(self.files, self.atoms))
 
     def _single_frame(self):
-        for file, atoms in self.files_and_atoms.items():
-            spamwriter = csv.writer(file)
-            spamwriter.writerow(atoms[0].position - atoms[1].position)
         # write csv vectors for single frame
+        for file, atoms in self.files_and_atoms.items():
+            atom1, atom2 = atoms[0], atoms[1]
+            csv_writer = csv.writer(file)
+            csv_writer.writerow(atom1.position - atom2.position)
 
     def _conclude(self):
-        for file in self.files_and_atoms.keys():
-            file.close()
         # called once iteration on the trajectory is finished.
         # close csv files
+        for file in self.files_and_atoms.keys():
+            file.close()

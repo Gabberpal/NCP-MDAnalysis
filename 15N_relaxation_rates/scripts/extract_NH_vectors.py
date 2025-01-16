@@ -49,5 +49,5 @@ if __name__ == '__main__':
                       selector=atom_pair_selecetor(atom_name_1="N",
                                                    atom_name_2="H",
                                                    resids_of_interest=resids_of_interest),
-                      filename_provider=OutputFilenameFormatter(output_directory="."),
+                      filename_provider=OutputFilenameFormatter(output_directory=args.output_directory),
                       ).run(verbose=True, progressbar_kwargs={"desc": "extract N-H vectors"})
