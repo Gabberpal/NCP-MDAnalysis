@@ -1,6 +1,5 @@
 import csv
 import os
-
 from typing import Callable
 
 from MDAnalysis.analysis.base import AnalysisBase

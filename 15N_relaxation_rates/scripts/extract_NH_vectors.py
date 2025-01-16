@@ -44,7 +44,7 @@ if __name__ == '__main__':
     first_rid, last_rid = args.residue_of_interest.split("-")
     resids_of_interest = set(list(range(int(first_rid), int(last_rid) + 1)))
 
-    # TODO: Implement WriteVectorsToCsv
+    # extract and write vectors in .csv
     WriteVectorsToCsv(ag=u.select_atoms(f"chainID {args.chain_name}"),
                       selector=atom_pair_selecetor(atom_name_1="N",
                                                    atom_name_2="H",
