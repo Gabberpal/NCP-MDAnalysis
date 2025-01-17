@@ -4,6 +4,11 @@ import MDAnalysis as mda
 from MDAnalysis import Universe
 from process_utils.select import get_sec_str_pattern
 
+import pandas as pd
+import os
+from MDAnalysis.analysis import rms
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Calculation RMSD')
     parser.add_argument('--path-to-trajectory', required=True)
@@ -41,5 +46,20 @@ if __name__ == '__main__':
     ...
 
     # calculate and save RMSD data
-    # TODO:
-    ...
+    R = rms.RMSD(atomgroup=u,
+                 reference=ref_trj,
+                 select=selection_sec_str,
+                 groupselections=[inner_dna_seceletion, outer_dna_seceletion, dna, all],
+                 ref_frame=0)
+    R.run()
+
+
+    rmsd_df = pd.DataFrame(R.results.rmsd[:, 1:],
+                           columns=['time_ns', 'rmsd_protein', 'rmsd_dna_inner', 'rmsd_dna_outer', 'rmsd_dna',
+                                    'rmsd_all'])
+    rmsd_df["time_ns"] /= 1000
+
+
+    # saving to a CSV file
+    os.makedirs(args.output_directory, exist_ok=True)
+    rmsd_df.to_csv(os.path.join(args.output_directory, "rmsd.csv"), index=False)
