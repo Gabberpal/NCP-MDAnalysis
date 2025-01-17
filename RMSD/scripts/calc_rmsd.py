@@ -26,16 +26,14 @@ if __name__ == '__main__':
     #  load trajectory
     trj_list = glob(os.path.join(args.path_to_trajectory, "*nc"))
     trj_list.sort()
-    traj = Universe(args.path_to_reference_pdb,
-                 trj_list[args.trajectory_start:args.trajectory_length + 1 ],
+    u = Universe(args.path_to_trajectory_reference,
+                 trj_list[args.trajectory_start:args.trajectory_length],
                  in_memory=True,
-                 in_memory_step=args.frames_per_trajectory_file,
-                 topology_format = "PDB"
+                 in_memory_step=args.frames_per_trajectory_file
                  )
 
     # set xray reference to calc RMSD
-    path_to_ref = args.path_to_xray_reference_pdb
-    ref_trj = mda.Universe(path_to_ref, topology_format="PDB")
+    xray_reference = mda.Universe(args.path_to_xray_reference)
 
     # set pattern to select CA atoms from secondary structure
     protein_chains = "A", "B", "C", "D", "E", "F", "G", "H"
@@ -54,7 +52,7 @@ if __name__ == '__main__':
         trans.NoJump(),
         trans.center_in_box(atoms),
         trans.wrap(atoms, compound="segments"),
-        trans.fit_rot_trans(atoms, ref_trj)
+        trans.fit_rot_trans(atoms, xray_reference)
     ]
     u.trajectory.add_transformations(*transforms)
 
