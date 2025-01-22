@@ -4,6 +4,10 @@ import MDAnalysis as mda
 from MDAnalysis import Universe
 from process_utils.select import get_sec_str_pattern
 
+import os
+import MDAnalysis.transformations as trans
+from glob import glob
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Calculation RMSD')
     parser.add_argument('--path-to-trajectory', required=True)
@@ -20,7 +24,19 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     #  load trajectory
-    u: Universe = ...  # TODO: Implement reading trajectory
+    trj_list = glob(os.path.join(args.path_to_trajectory, "*nc"))
+    trj_list.sort()
+    u = Universe(args.path_to_trajectory_reference,
+                 trj_list[args.trajectory_start:args.trajectory_length],
+                 in_memory=True,
+                 in_memory_step=args.frames_per_trajectory_file
+                 )
+    ref_trj = mda.Universe(args.path_to_trajectory_reference)
+    chainids = []
+    for segment in u.segments:
+        chainids.extend([segment.segid] * segment.atoms.n_atoms)
+    u.add_TopologyAttr("chainIDs", chainids)
+    ref_trj.add_TopologyAttr("chainIDs", chainids)
 
     # set xray reference to calc RMSD
     xray_reference = mda.Universe(args.path_to_xray_reference)
@@ -37,8 +53,14 @@ if __name__ == '__main__':
     ...
 
     # transform trajectory
-    # TODO:
-    ...
+    atoms = u.atoms
+    transforms = [
+        trans.NoJump(),
+        trans.center_in_box(atoms),
+        trans.wrap(atoms, compound="segments"),
+        trans.fit_rot_trans(atoms, ref_trj)
+    ]
+    u.trajectory.add_transformations(*transforms)
 
     # calculate and save RMSD data
     # TODO:
