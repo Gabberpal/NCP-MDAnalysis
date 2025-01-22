@@ -1,13 +1,14 @@
 import argparse
-import MDAnalysis as mda
-
-from MDAnalysis import Universe
-from process_utils.select import get_sec_str_pattern
-
-import pandas as pd
 import os
+import pandas as pd
+from glob import glob
+
+import MDAnalysis as mda
+import MDAnalysis.transformations as trans
+from MDAnalysis import Universe
 from MDAnalysis.analysis import rms
 
+from process_utils.select import get_sec_str_pattern
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Calculation RMSD')
@@ -25,25 +26,54 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     #  load trajectory
-    u: Universe = ...  # TODO: Implement reading trajectory
+    trj_list = glob(os.path.join(args.path_to_trajectory, "*nc"))
+    trj_list.sort()
+    u = Universe(args.path_to_trajectory_reference,
+                 trj_list[args.trajectory_start:args.trajectory_length],
+                 in_memory=True,
+                 in_memory_step=args.frames_per_trajectory_file
+                 )
+    ref_trj = mda.Universe(args.path_to_trajectory_reference)
+    chainids = []
+    for segment in u.segments:
+        chainids.extend([segment.segid] * segment.atoms.n_atoms)
+    u.add_TopologyAttr("chainIDs", chainids)
+    ref_trj.add_TopologyAttr("chainIDs", chainids)
 
     # set xray reference to calc RMSD
     xray_reference = mda.Universe(args.path_to_xray_reference)
 
     # set pattern to select CA atoms from secondary structure
-    protein_chains = "A", "B", "C", "D", "E", "F", "G", "H"
-    # TODO: get_sec_str_pattern
+    chainids = []
+    for segment in xray_reference.segments:
+        chainids.extend([segment.segid] * segment.atoms.n_atoms)
+    xray_reference.add_TopologyAttr("chainIDs", chainids)
+
+    protein_chains = ["A", "B", "C", "D", "E", "F", "G", "H"]
     selection_sec_str = get_sec_str_pattern(reference=xray_reference,
                                             cnain_ids=protein_chains)
     selection_sec_str_ca = f"name CA and {selection_sec_str}"
 
     # set pattern to select inner and outer DNA turns
-    # TODO:
-    ...
+    dna_inner_turn = ' '.join(f'{i}' for i in range(-38, 38 + 1))
+    dna_outer_turn = ' '.join(f'{i}' for i in range(-72, -39 + 1)) + f' ' \
+                     + ' '.join(f'{i}' for i in range(39, 72 + 1))
+
+    inner_dna_seceletion = f"(name N1 or name N9) and (chainID I or chainID J) and (resid {dna_inner_turn})"
+    outer_dna_seceletion = f"(name N1 or name N9) and (chainID I or chainID J) and (resid {dna_outer_turn})"
+
+    dna = f"({inner_dna_seceletion}) or ({outer_dna_seceletion})"
+    all = f"({dna}) or ({selection_sec_str})"
 
     # transform trajectory
-    # TODO:
-    ...
+    atoms = u.atoms
+    transforms = [
+        trans.NoJump(),
+        trans.center_in_box(atoms),
+        trans.wrap(atoms, compound="segments"),
+        trans.fit_rot_trans(atoms, ref_trj)
+    ]
+    u.trajectory.add_transformations(*transforms)
 
     # calculate and save RMSD data
     R = rms.RMSD(atomgroup=u,
