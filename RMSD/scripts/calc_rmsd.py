@@ -1,12 +1,14 @@
 import argparse
-import MDAnalysis as mda
-
-from MDAnalysis import Universe
-from process_utils.select import get_sec_str_pattern
-
 import os
-import MDAnalysis.transformations as trans
+import pandas as pd
 from glob import glob
+
+import MDAnalysis as mda
+import MDAnalysis.transformations as trans
+from MDAnalysis import Universe
+from MDAnalysis.analysis import rms
+
+from process_utils.select import get_sec_str_pattern
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Calculation RMSD')
@@ -74,5 +76,20 @@ if __name__ == '__main__':
     u.trajectory.add_transformations(*transforms)
 
     # calculate and save RMSD data
-    # TODO:
-    ...
+    R = rms.RMSD(atomgroup=u,
+                 reference=ref_trj,
+                 select=selection_sec_str,
+                 groupselections=[inner_dna_seceletion, outer_dna_seceletion, dna, all],
+                 ref_frame=0)
+    R.run()
+
+
+    rmsd_df = pd.DataFrame(R.results.rmsd[:, 1:],
+                           columns=['time_ns', 'rmsd_protein', 'rmsd_dna_inner', 'rmsd_dna_outer', 'rmsd_dna',
+                                    'rmsd_all'])
+    rmsd_df["time_ns"] /= 1000
+
+
+    # saving to a CSV file
+    os.makedirs(args.output_directory, exist_ok=True)
+    rmsd_df.to_csv(os.path.join(args.output_directory, "rmsd.csv"), index=False)
