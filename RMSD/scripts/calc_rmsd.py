@@ -31,6 +31,12 @@ if __name__ == '__main__':
                  in_memory=True,
                  in_memory_step=args.frames_per_trajectory_file
                  )
+    ref_trj = mda.Universe(args.path_to_trajectory_reference)
+    chainids = []
+    for segment in u.segments:
+        chainids.extend([segment.segid] * segment.atoms.n_atoms)
+    u.add_TopologyAttr("chainIDs", chainids)
+    ref_trj.add_TopologyAttr("chainIDs", chainids)
 
     # set xray reference to calc RMSD
     xray_reference = mda.Universe(args.path_to_xray_reference)
@@ -52,7 +58,7 @@ if __name__ == '__main__':
         trans.NoJump(),
         trans.center_in_box(atoms),
         trans.wrap(atoms, compound="segments"),
-        trans.fit_rot_trans(atoms, xray_reference)
+        trans.fit_rot_trans(atoms, ref_trj)
     ]
     u.trajectory.add_transformations(*transforms)
 
