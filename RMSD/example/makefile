@@ -1,5 +1,16 @@
 include common.mk
 
+all: figure/rmsd.png
+
+clean:
+	rm -rf data
+	rm -rf figure
+
+figure/rmsd.png: $(strip ${SCRIPT_DIR})/plot_rmsd.py data/rmsd_*.csv
+	python "$<" \
+        --path-to-rmsd_dir=data/ \
+        --output-directory=figure/
+
 data/rmsd_*.csv: $(strip ${SCRIPT_DIR})/calc_rmsd.py
 	python "$<" \
         --path-to-trajectory="$(strip ${TRAJECTORY_PATH})" \
