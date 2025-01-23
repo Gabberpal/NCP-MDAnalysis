@@ -1,10 +1,10 @@
 import argparse
 
-from process_utils.select import atom_pair_selecetor
-from process_utils.extract import WriteVectorsToCsv
-
 from MDAnalysis import Universe
 from MDAnalysis.core.groups import Atom
+
+from process_utils.select import atom_pair_selecetor
+from process_utils.extract import WriteVectorsToCsv
 
 
 class OutputFilenameFormatter:
@@ -14,7 +14,7 @@ class OutputFilenameFormatter:
     def __call__(self, atom_1: Atom, atom_2: Atom):
         return f"{self.output_directory}/" \
                f"{atom_1.chainID}-{atom_1.resid:02d}-{atom_1.resname}" \
-               f".csv"
+               f"-NH.csv"
 
 
 if __name__ == '__main__':
@@ -31,12 +31,16 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     #  load trajectory
-    u: Universe = ...  # TODO: Implement reading trajectory
+    traj = sorted(glob(os.path.join(args.path_to_trajectory, '*.nc'))) 
+    ref = Universe(args.path_to_trajectory_reference, format='PDB')
+    u = Universe(args.path_to_trajectory_reference, traj[:], in_memory=True, topology_format='PDB')
 
     # transform trajectory:
     transforms = [
-        ...,  # TODO: Implement transform (assemble quaternary structure)
-        ...,  # TODO: Implement transform (align to reference by CA atoms from secondary structure)
+        trans.NoJump(),
+        trans.center_in_box(u.atoms),
+        trans.wrap(u.atoms, compund='segments'),
+        fit_rot_trans_ca(u.atoms, ref)
     ]
     u.trajectory.add_transformations(*transforms)
 
