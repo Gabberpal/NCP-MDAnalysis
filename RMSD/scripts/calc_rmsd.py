@@ -77,7 +77,7 @@ if __name__ == '__main__':
 
     # calculate and save RMSD data
     R = rms.RMSD(atomgroup=u,
-                 reference=ref_trj,
+                 reference=xray_reference,
                  select=selection_sec_str_ca,
                  groupselections=[inner_dna_seceletion, outer_dna_seceletion, dna, all],
                  ref_frame=0)
