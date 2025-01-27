@@ -63,7 +63,7 @@ if __name__ == '__main__':
     outer_dna_seceletion = f"(name N1 or name N9) and (chainID I or chainID J) and (resid {dna_outer_turn})"
 
     dna = f"({inner_dna_seceletion}) or ({outer_dna_seceletion})"
-    all = f"({dna}) or ({selection_sec_str})"
+    all = f"({dna}) or ({selection_sec_str_ca})"
 
     # transform trajectory
     atoms = u.atoms
@@ -78,7 +78,7 @@ if __name__ == '__main__':
     # calculate and save RMSD data
     R = rms.RMSD(atomgroup=u,
                  reference=ref_trj,
-                 select=selection_sec_str,
+                 select=selection_sec_str_ca,
                  groupselections=[inner_dna_seceletion, outer_dna_seceletion, dna, all],
                  ref_frame=0)
     R.run()
