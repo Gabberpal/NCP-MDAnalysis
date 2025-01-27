@@ -22,4 +22,4 @@ def get_sec_str_pattern(reference: Universe,
             ss_selection = f"(chainID {chain} and resid {' '.join(ss_residues.astype(str))})"
             sec_str_patterns.append(ss_selection)
 
-    return " or ".join(sec_str_patterns) if sec_str_patterns else ""
+    return f"({' or '.join(sec_str_patterns)})" if sec_str_patterns else ""
