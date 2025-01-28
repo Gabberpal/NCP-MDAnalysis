@@ -66,21 +66,47 @@ def add_relpath_to_top_corner(figure: plt.Figure):
 
 
 def settings_plot(graph_label):
+    """
+    Creates a matplotlib figure and axis with predefined settings, including a labeled graph
+    and a text box with a custom label in the top-right corner.
+
+    Args:
+        graph_label (str): The label to be displayed in the top-right corner of the plot.
+
+    Returns:
+        tuple: A tuple containing the matplotlib figure (fig) and axis (ax) objects.
+    """
+    # Define positions and dimensions for the text box
     left, width = .40, .54
     bottom, height = .40, .54
     right = left + width
     top = bottom + height
+
+    # Create a new figure and axis
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.text(right, top, graph_label,
-            horizontalalignment='right',
-            verticalalignment='top',
-            transform=ax.transAxes,
-            multialignment='left',
-            bbox={'facecolor': 'moccasin', 'alpha': 0.5, 'pad': 6})
-    ax.set_xlabel('time, ns', fontsize=13)
-    ax.set_ylabel('C(t)', fontsize=13)
-    return fig, ax
+
+    # Add the graph label to the top-right corner of the plot
+    ax.text(
+        right,  # x-coordinate (right-aligned)
+        top,  # y-coordinate (top-aligned)
+        graph_label,  # Text to display (graph label)
+        horizontalalignment='right',  # Align text to the right
+        verticalalignment='top',  # Align text to the top
+        transform=ax.transAxes,  # Use axis coordinates for positioning
+        multialignment='left',  # Align multi-line text to the left
+        bbox={
+            'facecolor': 'moccasin',  # Background color of the text box
+            'alpha': 0.5,  # Transparency of the text box
+            'pad': 6  # Padding around the text
+        }
+    )
+
+    # Set labels for the x and y axes
+    ax.set_xlabel('time, ns', fontsize=13)  # Label for the x-axis
+    ax.set_ylabel('C(t)', fontsize=13)  # Label for the y-axis
+
+    return fig, ax  # Return the figure and axis objects
 
 
 def set_axis_parameters(xname, yname, title_tag=""):
