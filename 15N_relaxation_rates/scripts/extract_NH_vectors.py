@@ -43,7 +43,7 @@ if __name__ == '__main__':
     transforms = [
         trans.NoJump(),
         trans.center_in_box(u.atoms),
-        trans.wrap(u.atoms, compund='segments'),
+        trans.wrap(u.atoms, compound='segments'),
         fit_rot_trans_ca(u.atoms, ref)
     ]
     u.trajectory.add_transformations(*transforms)
