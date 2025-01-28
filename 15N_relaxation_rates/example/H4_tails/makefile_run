@@ -1,6 +1,18 @@
 include ../common.mk
 include vars.mk
 
+all: data/relaxation_rate/R2.csv figure/tau_6_exp.pdf
+
+clean:
+	rm -rf data
+	rm -rf figure
+
+data/relaxation_rate/R2.csv: $(strip ${SCRIPT_DIR})/calc_relaxation_rates.py data/fit/tau_6_exp.csv
+	python "$<" \
+	    --path-to-fit-dir=data/fit \
+	    --output-directory=data/relaxation_rate \
+	    --nmr-freq="$(strip ${NMR_FREQ})"
+
 
 figure/tau_6_exp.pdf: $(strip ${SCRIPT_DIR})/plot_autocorrelation_function_with_fit.py data/fit/tau_6_exp.csv
 	mkdir -p figure/
