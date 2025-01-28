@@ -45,7 +45,7 @@ def calc_acorr(x):
     return np.real(result)
 
 
-def calc_acorr_order_2(vectors, limit=-1):
+def calc_acorr_order_2(vectors):
     vectors = vectors / np.linalg.norm(vectors, axis=1)[:, np.newaxis]
     res = [calc_acorr(vectors) for vectors in [Y2m2(vectors), Y2m1(vectors), Y20(vectors)]]
     res[0] = 2.0 * res[0]
