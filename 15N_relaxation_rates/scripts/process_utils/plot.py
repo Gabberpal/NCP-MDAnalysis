@@ -3,8 +3,27 @@ import matplotlib.pyplot as plt
 
 
 def get_autocorr_graph_label(fit_line):
-    amplitude = fit_line.filter(like='-a')
-    tau = fit_line.filter(like='-tau')
+    """
+    Generates a formatted label for an autocorrelation graph based on fitted parameters.
+
+    This function takes a pandas Series (`fit_line`) containing fitted parameters (amplitudes and relaxation times)
+    and creates a human-readable label for a graph. The label includes the amplitude (A) and relaxation time (τ) values
+    in a formatted string.
+
+    Args:
+        fit_line (pd.Series): A pandas Series containing fitted parameters. The Series should include keys
+                              for amplitudes (ending with '-a') and relaxation times (ending with '-tau').
+
+    Returns:
+        str: A formatted string representing the graph label. Each line contains an amplitude and its corresponding
+             relaxation time in the format:
+             "A = <value> ; τ = <value>"
+    """
+    # Extract amplitude and tau values from the Series
+    amplitude = fit_line.filter(like='-a') # Filter keys containing '-a' (amplitudes)
+    tau = fit_line.filter(like='-tau') # Filter keys containing '-tau' (relaxation times)
+
+    # Create a list of formatted strings for each amplitude-tau pair
     union_a_tau = ["{a_label:2s} = {a_value:5.3e} ; {tau_label:3s} = {tau_value: 8.3e}".format(
         a_label=a_label,
         a_value=fit_line[a_label],
@@ -12,6 +31,8 @@ def get_autocorr_graph_label(fit_line):
         tau_value=fit_line[tau_label])
         for a_label, tau_label in zip(amplitude.index.tolist(), tau.index.tolist())
     ]
+
+    # Join the formatted strings into a single multi-line label
     graph_label = "\n".join(union_a_tau)
     return graph_label
 
