@@ -36,8 +36,8 @@ if __name__ == '__main__':
 
     #  load trajectory
     traj = sorted(glob(os.path.join(args.path_to_trajectory, '*.nc'))) 
-    ref = Universe(args.path_to_trajectory_reference, format='PDB')
-    u = Universe(args.path_to_trajectory_reference, traj[:], in_memory=True, topology_format='PDB')
+    ref = Universe(args.path_to_trajectory_reference)
+    u = Universe(args.path_to_trajectory_reference, traj)
 
     # transform trajectory:
     transforms = [
