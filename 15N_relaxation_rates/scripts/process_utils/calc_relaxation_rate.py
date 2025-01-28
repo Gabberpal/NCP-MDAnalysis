@@ -5,25 +5,56 @@ from math import pi
 
 
 def _calc_R1(amplitude, taus_s, nmr_freq):
+    """
+    Calculates the longitudinal relaxation rate (R1) for NMR spectroscopy based on spectral density functions.
+
+    Args:
+        amplitude (list or np.array): Amplitudes of the spectral density components.
+        taus_s (list or np.array): Correlation times (in seconds) for the spectral density components.
+        nmr_freq (float): NMR frequency in Hz.
+
+    Returns:
+        float: The calculated R1 relaxation rate.
+    """
 
     def J(w):
+        """
+        Calculates the spectral density function J(w) for a given frequency w.
+
+        Args:
+            w (float): Frequency in rad/s.
+
+        Returns:
+            float: The value of the spectral density function at frequency w.
+        """
         return sum(
-            (2 / 5 * a * tau/(1+np.square(tau*w))) for a, tau in zip(amplitude, taus_s))
+            (2 / 5 * a * tau / (1 + np.square(tau * w))) for a, tau in zip(amplitude, taus_s)
+        )
 
-    u0 = 4 * pi * 1e-7
-    h = 6.626069e-34
-    gH = 267.522e6
-    gX = -27.126e6
-    CSA=-172.0  # unit: ppm
-    rHX=1.02e-10
+    # Physical constants
+    u0 = 4 * pi * 1e-7  # Vacuum permeability (H/m)
+    h = 6.626069e-34  # Planck's constant (J·s)
+    gH = 267.522e6  # Gyromagnetic ratio of hydrogen (rad/(s·T))
+    gX = -27.126e6  # Gyromagnetic ratio of the heteronucleus (rad/(s·T))
+    CSA = -172.0  # Chemical shift anisotropy (ppm)
+    rHX = 1.02e-10  # Distance between hydrogen and heteronucleus (m)
 
-    d2 = ((u0/4/pi)*(h/2/pi)*(gH*gX)/(rHX**3))**2
-    gHX = gH / gX  # ratio gamma_H to gamma_X
-    wH = 2 * pi * nmr_freq
-    wX = wH/gHX
-    c2 = (1./3.)*((CSA*1e-6*wX)**2)
+    # Calculate the dipolar coupling constant (d^2)
+    d2 = ((u0 / 4 / pi) * (h / 2 / pi) * (gH * gX) / (rHX**3)) ** 2
 
-    R1 = 0.25*d2*(3*J(wX)+J(wH-wX)+6*J(wH+wX)) + c2*J(wX)
+    # Calculate the ratio of gyromagnetic ratios (gamma_H / gamma_X)
+    gHX = gH / gX
+
+    # Calculate angular frequencies for hydrogen (wH) and heteronucleus (wX)
+    wH = 2 * pi * nmr_freq  # Angular frequency of hydrogen (rad/s)
+    wX = wH / gHX  # Angular frequency of heteronucleus (rad/s)
+
+    # Calculate the chemical shift anisotropy term (c^2)
+    c2 = (1.0 / 3.0) * ((CSA * 1e-6 * wX) ** 2)
+
+    # Calculate the R1 relaxation rate using spectral density functions
+    R1 = 0.25 * d2 * (3 * J(wX) + J(wH - wX) + 6 * J(wH + wX)) + c2 * J(wX)
+
     return R1
 
 def _calc_R2(amplitude, taus_s, nmr_freq):
