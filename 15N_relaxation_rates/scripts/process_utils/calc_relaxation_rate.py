@@ -120,17 +120,45 @@ def _calc_R2(amplitude, taus_s, nmr_freq):
 
 
 def calc_relaxition(path_to_fit_csv, nmr_freq, func):
+    """
+    Calculates relaxation rates (R1 or R2) for multiple entries in a CSV file containing fit parameters.
 
+    Args:
+        path_to_fit_csv (str): Path to the CSV file containing fit parameters (amplitudes and taus).
+        nmr_freq (float): NMR frequency in Hz.
+        func (callable): Function to calculate the relaxation rate (e.g., `_calc_R1` or `_calc_R2`).
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the calculated relaxation rates for each entry in the CSV file.
+                      Columns include 'rName', 'rId', and 'relaxation_rate'.
+    """
+    # Read the CSV file containing fit parameters
     df = pd.read_csv(path_to_fit_csv)
+
+    # Initialize an empty DataFrame to store the results
     rate_table = pd.DataFrame()
-    for ind,fit_line in df.iterrows():
-        amplitude = fit_line.filter(like='-a') 
-        taus = fit_line.filter(like='-tau')
-        taus_s = taus * 1e-9
+
+    # Iterate over each row in the DataFrame
+    for ind, fit_line in df.iterrows():
+        # Extract amplitudes and taus from the fit line
+        amplitude = fit_line.filter(like='-a')  # Amplitudes (columns containing '-a')
+        taus = fit_line.filter(like='-tau')  # Correlation times (columns containing '-tau')
+        taus_s = taus * 1e-9  # Convert taus from nanoseconds to seconds
+
+        # Calculate the relaxation rate using the provided function
         rate = func(amplitude, taus_s, nmr_freq)
-        D = {'rName': df.rName[ind], 'rId': df.rId[ind], "relaxation_rate": rate}
+
+        # Create a dictionary with the results for the current entry
+        D = {
+            'rName': df.rName[ind],  # Name of the residue
+            'rId': df.rId[ind],  # ID of the residue
+            "relaxation_rate": rate  # Calculated relaxation rate
+        }
+
+        # Append the results to the rate_table DataFrame
         temp = pd.DataFrame(D, index=[0])
         rate_table = pd.concat([rate_table, temp])
+
     return rate_table
 
 
