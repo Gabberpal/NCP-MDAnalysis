@@ -4,8 +4,8 @@ import numpy as np
 
 from glob import glob
 from tqdm import tqdm
-
 from typing import Callable, Iterable
+
 from process_utils.calc import calc_acorr_order_2
 from process_utils.fit import repeated_fit_auto_correlation
 

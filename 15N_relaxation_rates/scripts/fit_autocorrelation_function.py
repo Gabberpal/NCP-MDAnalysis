@@ -1,6 +1,8 @@
-from process_utils.save_utils import fit_and_save_acorr_func
 import argparse
 import numpy as np
+
+from process_utils.save_utils import fit_and_save_acorr_func
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='fit acorr')

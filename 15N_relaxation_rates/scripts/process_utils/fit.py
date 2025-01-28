@@ -1,6 +1,7 @@
 import numpy as np
-from scipy.optimize import curve_fit
+
 from typing import Tuple, List, Union, Iterable
+from scipy.optimize import curve_fit
 
 
 def __multi_exp_f(x: Union[float, int],
