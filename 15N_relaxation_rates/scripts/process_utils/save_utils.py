@@ -1,3 +1,9 @@
+import os
+import pandas as pd
+import numpy as np 
+
+from tqdm import tqdm
+
 from typing import Callable, Iterable
 from process_utils.calc import calc_acorr_order_2
 
@@ -24,4 +30,22 @@ def calc_and_save_acorr(path_to_vector_csv_files: Iterable[str],
     :param out_dir: Directory where the autocorrelation results will be saved. Default is the current directory
     :return:
     """
-    pass
+    index = None
+    for path_to_vector_file in tqdm(sorted(path_to_vector_csv_files)):
+
+        out_name = os.path.basename(path_to_vector_file).split("_")[0]
+        vectors = pd.read_csv(path_to_vector_file).values
+        acorr = acorr_func(vectors)[:acorr_func_limit]
+
+        if index is None:
+            index = len(acorr)
+            time_ns = np.linspace(0, index * dt_ns, index, endpoint=False)
+
+        if (thumbling_time is not None) and (thumbling_time > 0):
+            acorr *= np.exp(-time_ns / thumbling_time)
+
+        os.makedirs(out_dir, exist_ok=True)
+        pd.DataFrame({
+            "time_ns": time_ns,
+            "acorr": acorr
+        }).to_csv(os.path.join(out_dir, out_name), index=False)
