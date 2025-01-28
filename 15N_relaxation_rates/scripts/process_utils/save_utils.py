@@ -1,7 +1,8 @@
 import os
-import tqdm
 import pandas as pd
 import numpy as np 
+
+from tqdm import tqdm
 
 from typing import Callable, Iterable
 from process_utils.calc import calc_acorr_order_2
@@ -33,8 +34,8 @@ def calc_and_save_acorr(path_to_vector_csv_files: Iterable[str],
     for path_to_vector_file in tqdm(sorted(path_to_vector_csv_files)):
 
         out_name = os.path.basename(path_to_vector_file).split("_")[0]
-        vectors_1 = pd.read_csv(path_to_vector_file).values
-        acorr = acorr_func(vectors_1)[:acorr_func_limit]
+        vectors = pd.read_csv(path_to_vector_file).values
+        acorr = acorr_func(vectors)[:acorr_func_limit]
 
         if index is None:
             index = len(acorr)
