@@ -57,32 +57,65 @@ def _calc_R1(amplitude, taus_s, nmr_freq):
 
     return R1
 
+
 def _calc_R2(amplitude, taus_s, nmr_freq):
+    """
+    Calculates the transverse relaxation rate (R2) for NMR spectroscopy based on spectral density functions.
+
+    Args:
+        amplitude (list, np.array, int, or float): Amplitudes of the spectral density components.
+        taus_s (list, np.array, int, or float): Correlation times (in seconds) for the spectral density components.
+        nmr_freq (float): NMR frequency in Hz.
+
+    Returns:
+        float: The calculated R2 relaxation rate.
+    """
+
     def J(w):
+        """
+        Calculates the spectral density function J(w) for a given frequency w.
+
+        Args:
+            w (float): Frequency in rad/s.
+
+        Returns:
+            float: The value of the spectral density function at frequency w.
+        """
         return sum(
-            (2 / 5 * a * tau / (1 + np.square(tau * w))) for a, tau in zip(amplitude, taus_s))
+            (2 / 5 * a * tau / (1 + np.square(tau * w))) for a, tau in zip(amplitude, taus_s)
+        )
 
-    # Calculate dipolar coupling constant d2 -------------------------------
-    u0 = 4 * pi * 1e-7
-    h = 6.626069e-34
-    gH = 267.522e6
-    gX = -27.126e6
-    CSA = -172.0  # unit: ppm
-    rHX = 1.02e-10
+    # Physical constants
+    u0 = 4 * pi * 1e-7  # Vacuum permeability (H/m)
+    h = 6.626069e-34  # Planck's constant (J·s)
+    gH = 267.522e6  # Gyromagnetic ratio of hydrogen (rad/(s·T))
+    gX = -27.126e6  # Gyromagnetic ratio of the heteronucleus (rad/(s·T))
+    CSA = -172.0  # Chemical shift anisotropy (ppm)
+    rHX = 1.02e-10  # Distance between hydrogen and heteronucleus (m)
 
-    d2 = ((u0 / 4 / pi) * (h / 2 / pi) * (gH * gX) / (rHX ** 3)) ** 2
-    gHX = gH / gX  # ratio gamma_H to gamma_X
-    wH = 2 * pi * nmr_freq
-    wX = wH / gHX
-    c2 = (1. / 3.) * ((CSA * 1e-6 * wX) ** 2)
+    # Calculate the dipolar coupling constant (d^2)
+    d2 = ((u0 / 4 / pi) * (h / 2 / pi) * (gH * gX) / (rHX**3)) ** 2
 
-    if isinstance(amplitude, int) or isinstance(amplitude, float):
+    # Calculate the ratio of gyromagnetic ratios (gamma_H / gamma_X)
+    gHX = gH / gX
+
+    # Calculate angular frequencies for hydrogen (wH) and heteronucleus (wX)
+    wH = 2 * pi * nmr_freq  # Angular frequency of hydrogen (rad/s)
+    wX = wH / gHX  # Angular frequency of heteronucleus (rad/s)
+
+    # Calculate the chemical shift anisotropy term (c^2)
+    c2 = (1.0 / 3.0) * ((CSA * 1e-6 * wX) ** 2)
+
+    # Ensure amplitude and taus_s are iterable (convert to lists if they are single values)
+    if isinstance(amplitude, (int, float)):
         amplitude = [amplitude]
-    if isinstance(taus_s, int) or isinstance(taus_s, float):
+    if isinstance(taus_s, (int, float)):
         taus_s = [taus_s]
 
+    # Calculate the R2 relaxation rate using spectral density functions
     R2 = 0.125 * d2 * (4 * J(0) + 3 * J(wX) + J(wH - wX) + 6 * J(wH) + 6 * J(wH + wX)) + \
-         (1. / 6.) * c2 * (4 * J(0) + 3 * J(wX))
+         (1.0 / 6.0) * c2 * (4 * J(0) + 3 * J(wX))
+
     return R2
 
 
