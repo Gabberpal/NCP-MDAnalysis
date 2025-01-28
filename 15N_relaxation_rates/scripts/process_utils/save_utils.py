@@ -4,7 +4,7 @@ import numpy as np
 
 from glob import glob
 from tqdm import tqdm
-from typing import Callable, Iterable
+from typing import Callable, Iterable, Optional
 
 from process_utils.calc import calc_acorr_order_2
 from process_utils.fit import repeated_fit_auto_correlation
@@ -53,47 +53,78 @@ def calc_and_save_acorr(path_to_vector_csv_files: Iterable[str],
         }).to_csv(os.path.join(out_dir, out_name), index=False)
 
 
-def fit_and_save_acorr_func(path_to_acorr_files,
-                            bounds,
-                            p0=None,
-                            lag_spacing="log",
-                            n_lag_points=None,
-                            output_directory="./",
-                            limit_ns=None):
+def fit_and_save_acorr_func(path_to_acorr_files: str,
+                            bounds: list[tuple[float, float]],
+                            p0: Optional[list[float]] = None,
+                            lag_spacing: str = "log",
+                            n_lag_points: Optional[int] = None,
+                            output_directory: str = "./",
+                            limit_ns: Optional[float] = None) -> None:
+    """
+    Fits autocorrelation functions from CSV files and saves the results.
+
+    This function reads autocorrelation data from CSV files, fits the data using a specified
+    fitting function, and saves the fitted parameters (amplitudes and relaxation times) to
+    a new CSV file.
+
+    Args:
+        path_to_acorr_files (str): Path to the directory containing autocorrelation CSV files.
+        bounds (List[Tuple[float, float]]): List of tuples specifying the bounds for the fitting parameters.
+        p0 (Optional[List[float]]): Initial guesses for the fitting parameters. Defaults to None.
+        lag_spacing (str): Spacing type for lag points. Options: "log" (logarithmic) or "linear". Defaults to "log".
+        n_lag_points (Optional[int]): Number of lag points to use if lag_spacing is "log". Defaults to None.
+        output_directory (str): Directory to save the output CSV files. Defaults to "./".
+        limit_ns (Optional[float]): Maximum time (in nanoseconds) to consider for fitting. Defaults to None.
+
+    Returns:
+        None: The function saves the results to CSV files in the specified output directory.
+    """
+    # Find all CSV files in the specified directory
     path_to_ccr_csv_files = sorted(glob(os.path.join(path_to_acorr_files, "*.csv")))
     rname_list = []
+
+    # Extract residue names from filenames
     for file in path_to_ccr_csv_files:
         aa_name = file.split('-')[2]
         rname_list.append(aa_name)
+
+    # Iterate over bounds and fit autocorrelation functions    
     for bound in bounds:
         tau_table = pd.DataFrame()
         for acorr_corr_file in tqdm(path_to_ccr_csv_files, desc=output_directory):
             df = pd.read_csv(acorr_corr_file)
+
+            # Apply time limit if specified
             if limit_ns:
                 df = df[df["time_ns"] <= limit_ns]
 
             time_ns, acorr = df["time_ns"].values, df["acorr"].values
 
+            # Apply logarithmic spacing if specified
             if lag_spacing == "log":
                 lag_index = np.unique(
                     np.logspace(0, int(np.log10(time_ns.size)), n_lag_points, endpoint=False).astype(int))
                 acorr = np.take(acorr, lag_index)
                 time_ns = np.take(time_ns, lag_index)
 
+            # Fit the autocorrelation function
             popt = repeated_fit_auto_correlation(acorr, time_ns, bound, p0)
             name = os.path.splitext(os.path.basename(acorr_corr_file))[0]
             amplitudes = popt[::2]
             taus = popt[1::2]
             order = (len(bound[0]) + 1) // 2
 
+            # Extract residue ID
             rid = int(name.split("-")[1])
-
+            
+            # Create a dictionary for the fitted parameters
             popt_dict = {
                 'rId': rid,
                 'rName': rname_list[rid - 2],
                 'limit_ns': limit_ns
             }
 
+            # Add amplitudes and relaxation times to the dictionary
             popt_dict.update(
                 {("exp-%d-a%d" % (order, i + 1)): a for i, a in enumerate(amplitudes)}
             )
@@ -101,8 +132,10 @@ def fit_and_save_acorr_func(path_to_acorr_files,
                 {("exp-%d-tau%d" % (order, i + 1)): tau for i, tau in enumerate(taus)}
             )
 
+            # Append the results to the DataFrame
             tau_table = pd.concat([tau_table, pd.DataFrame(popt_dict, index=[0])])
 
+        # Sort the DataFrame by residue ID and save to CSV
         tau_table.sort_values(by=['rId'], inplace=True)
         os.makedirs(output_directory, exist_ok=True)
         tau_table.to_csv(os.path.join(output_directory, 'tau_%d_exp.csv' % order), index=False)
