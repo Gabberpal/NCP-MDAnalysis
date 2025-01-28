@@ -163,19 +163,53 @@ def calc_relaxition(path_to_fit_csv, nmr_freq, func):
 
 
 def get_relaxition_rate(path_to_fit, nmr_freq, output_directory="./", rate="R1"):
+    """
+    Calculates relaxation rates (R1 or R2) for multiple fit files and saves the results to a CSV file.
+
+    Args:
+        path_to_fit (str): Path to the directory containing fit files (e.g., `tau_*_exp.csv`).
+        nmr_freq (float): NMR frequency in Hz.
+        output_directory (str, optional): Directory to save the output CSV file. Defaults to "./".
+        rate (str, optional): Type of relaxation rate to calculate. Must be "R1" or "R2". Defaults to "R1".
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the calculated relaxation rates for all fit files.
+    """
     from glob import glob
+
+    # Dictionary mapping rate types to their corresponding calculation functions
     func_dict = {"R1": _calc_R1, "R2": _calc_R2}
+
+    # Initialize an empty DataFrame to store the results
     df = pd.DataFrame()
+
+    # Define the pattern for fit files
     fits = ["tau_*_exp.csv"]
+
+    # Iterate over each fit file pattern
     for fit in fits:
+        # Construct the full path to the fit files
         path_to_fit_csv = os.path.join(path_to_fit, fit)
-        relaxation_rate = calc_relaxition(sorted(glob(path_to_fit_csv))[-1], nmr_freq, func_dict[rate])
+
+        # Find the most recent fit file matching the pattern
+        latest_fit_file = sorted(glob(path_to_fit_csv))[-1]
+
+        # Calculate relaxation rates using the specified function
+        relaxation_rate = calc_relaxition(latest_fit_file, nmr_freq, func_dict[rate])
+
+        # Merge the results into the main DataFrame
         if df.empty:
             df = relaxation_rate
         else:
             df = pd.merge(df, relaxation_rate, left_index=False, right_index=False)
+
+    # Create the output directory if it doesn't exist
     os.makedirs(output_directory, exist_ok=True)
-    df.to_csv(os.path.join(output_directory, "{rate}.csv".format(rate=rate)), index=False)
+
+    # Save the results to a CSV file
+    output_file = os.path.join(output_directory, "{rate}.csv".format(rate=rate))
+    df.to_csv(output_file, index=False)
+
     return df
 
 
