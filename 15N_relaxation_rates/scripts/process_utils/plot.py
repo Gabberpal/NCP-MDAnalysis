@@ -38,13 +38,31 @@ def get_autocorr_graph_label(fit_line):
 
 
 def add_relpath_to_top_corner(figure: plt.Figure):
+    """
+    Adds a relative path of the current working directory (relative to a specified base directory)
+    to the top-right corner of the given matplotlib figure.
+
+    Args:
+        figure (plt.Figure): The matplotlib figure to which the text will be added.
+
+    The function creates a transparent axis covering the entire figure and adds a text annotation
+    in the top-right corner with the relative path of the current directory.
+    """
+    # Create a transparent axis that covers the entire figure
     big_axis = figure.add_axes([0, 0, 1, 1], facecolor=(1, 1, 1, 0))
 
-    big_axis.text(0.99, 0.99,
-                  os.path.relpath(os.path.abspath(os.curdir), os.path.expanduser("~/bioinf/handling")),
-                  color="#CCCCCC",
-                  horizontalalignment='right',
-                  verticalalignment='top')
+    # Calculate the relative path of the current directory relative to the specified base directory
+    relpath = os.path.relpath(os.path.abspath(os.curdir), os.path.expanduser("~/bioinf/handling"))
+
+    # Add the relative path as text to the top-right corner of the figure
+    big_axis.text(
+        0.99,  # x-coordinate (right-aligned)
+        0.99,  # y-coordinate (top-aligned)
+        relpath,  # Text to display (relative path)
+        color="#CCCCCC",  # Light gray color for the text
+        horizontalalignment='right',  # Align text to the right
+        verticalalignment='top'  # Align text to the top
+    )
 
 
 def settings_plot(graph_label):
