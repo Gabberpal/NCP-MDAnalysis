@@ -2,6 +2,15 @@ include ../common.mk
 include vars.mk
 
 
+figure/tau_6_exp.pdf: $(strip ${SCRIPT_DIR})/plot_autocorrelation_function_with_fit.py data/fit/tau_6_exp.csv
+	mkdir -p figure/
+	python "$<" \
+	    --path-to-acorr-csv=data/acorr \
+	    --path-to-fit-csv=data/fit/ \
+	    --path-to-reference-pdb="$(strip ${REFERENCE_PDB_PATH})" \
+	    --output-directory=figure/ \
+
+
 data/fit/tau_6_exp.csv: $(strip ${SCRIPT_DIR})/fit_autocorrelation_function.py data/acorr/*.csv
 	python "$<" \
 		--path-to-acorr-csv=data/acorr \
