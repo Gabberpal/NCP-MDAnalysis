@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-import numpy as np 
+import numpy as np
 
 from glob import glob
 from tqdm import tqdm
@@ -15,7 +15,7 @@ def calc_and_save_acorr(path_to_vector_csv_files: Iterable[str],
                         acorr_func_limit: int = -1,
                         thumbling_time: float = None,
                         acorr_func: Callable = calc_acorr_order_2,
-                        out_dir: str = "."):
+                        out_dir: str = ".") -> None:
     """
     This function calculates the autocorrelation function for a vector array stored in CSV files and saves the results to an output directory.
 
@@ -32,24 +32,33 @@ def calc_and_save_acorr(path_to_vector_csv_files: Iterable[str],
     :param out_dir: Directory where the autocorrelation results will be saved. Default is the current directory
     :return:
     """
+    # Initialize index to store the length of the autocorrelation array
     index = None
+
+    # Iterate over each CSV file containing vector data
     for path_to_vector_file in tqdm(sorted(path_to_vector_csv_files)):
 
         out_name = os.path.basename(path_to_vector_file).split("_")[0]
         vectors = pd.read_csv(path_to_vector_file).values
         acorr = acorr_func(vectors)[:acorr_func_limit]
 
+        # If this is the first file, initialize the time array
         if index is None:
             index = len(acorr)
             time_ns = np.linspace(0, index * dt_ns, index, endpoint=False)
 
+        # Reintroduce tumbling effects if thumbling_time is provided
         if (thumbling_time is not None) and (thumbling_time > 0):
             acorr *= np.exp(-time_ns / thumbling_time)
 
+        # Create the output directory if it doesn't exist
         os.makedirs(out_dir, exist_ok=True)
+
+        # Save the autocorrelation results to a CSV file
+
         pd.DataFrame({
-            "time_ns": time_ns,
-            "acorr": acorr
+            "time_ns": time_ns,  # Time values in nanoseconds
+            "acorr": acorr  # Autocorrelation values
         }).to_csv(os.path.join(out_dir, out_name), index=False)
 
 
@@ -116,7 +125,7 @@ def fit_and_save_acorr_func(path_to_acorr_files: str,
 
             # Extract residue ID
             rid = int(name.split("-")[1])
-            
+
             # Create a dictionary for the fitted parameters
             popt_dict = {
                 'rId': rid,
