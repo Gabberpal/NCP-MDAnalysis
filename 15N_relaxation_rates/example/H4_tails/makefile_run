@@ -1,12 +1,26 @@
 include ../common.mk
 include vars.mk
 
+
+data/fit/tau_6_exp.csv: $(strip ${SCRIPT_DIR})/fit_autocorrelation_function.py data/acorr/*.csv
+	python "$<" \
+		--path-to-acorr-csv=data/acorr \
+		--path-to-reference-pdb="$(strip ${REFERENCE_PDB_PATH})" \
+		--chain-name="$(strip ${CHAIN_NAME})" \
+		--n-lag-points="$(strip ${N_LAG_POINTS})" \
+		--tumbling-time-ns="$(strip ${TUMBLING_TIME})" \
+		--output-directory=data/fit \
+		--limit_ns="$(strip ${FIT_LIMIT_NS})" \
+        --lag-spacing="$(strip ${LAG_SPACING})"
+
+
 data/acorr/*.csv: $(strip ${SCRIPT_DIR})/calc_NH_autocorrelation_function.py data/vectors/*.csv
 	python3 "$<" \
 	    --path-to-vectors-csv-dir="data/vectors" \
 	    --dt-ns="$(strip ${DT_NS})" \
 	    --tumbling-time-ns="$(strip ${TUMBLING_TIME})" \
 	    --output-directory=data/acorr \
+
 
 data/vectors/*.csv: $(strip ${SCRIPT_DIR})/extract_NH_vectors.py
 	python3 "$<" \
