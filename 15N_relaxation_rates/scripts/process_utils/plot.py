@@ -110,12 +110,37 @@ def settings_plot(graph_label):
 
 
 def set_axis_parameters(xname, yname, title_tag=""):
+    """
+    Creates a matplotlib figure and axis with customized axis labels, title, and grid.
+
+    Args:
+        xname (str): The label for the x-axis.
+        yname (str): The label for the y-axis.
+        title_tag (str, optional): The title of the plot. Defaults to an empty string.
+
+    Returns:
+        tuple: A tuple containing the matplotlib figure (fig) and axis (ax) objects.
+    """
+    # Create a new figure with a custom size (20x12 inches)
     fig = plt.figure(figsize=(20, 12))
+
+    # Add a subplot to the figure
     ax = fig.add_subplot(111)
+
+    # Set the x-axis label with a custom font size
     ax.set_xlabel('{xname}'.format(xname=xname), fontsize=22)
+
+    # Set the y-axis label with a custom font size
     ax.set_ylabel('{yname}'.format(yname=yname), fontsize=22)
+
+    # Set the title of the plot with a custom font size and center alignment
     ax.set_title('{title_tag}'.format(title_tag=title_tag), fontsize=25, loc='center')
+
+    # Customize the font size of the x and y tick labels
     plt.xticks(fontsize=19)
     plt.yticks(fontsize=19)
+
+    # Enable the grid for the plot
     ax.grid(True)
-    return fig, ax
+
+    return fig, ax  # Return the figure and axis objects
