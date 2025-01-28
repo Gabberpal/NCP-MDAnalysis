@@ -1,13 +1,15 @@
 import os
 import pandas as pd
 import numpy as np
-
+import matplotlib.pyplot as plt
 from glob import glob
 from tqdm import tqdm
 from typing import Callable, Iterable, Optional
+from matplotlib.backends.backend_pdf import PdfPages
 
 from process_utils.calc import calc_acorr_order_2
-from process_utils.fit import repeated_fit_auto_correlation
+from process_utils.fit import repeated_fit_auto_correlation, __multi_exp_f
+from process_utils.plot import add_relpath_to_top_corner, settings_plot, get_autocorr_graph_label
 
 
 def calc_and_save_acorr(path_to_vector_csv_files: Iterable[str],
@@ -148,3 +150,41 @@ def fit_and_save_acorr_func(path_to_acorr_files: str,
         tau_table.sort_values(by=['rId'], inplace=True)
         os.makedirs(output_directory, exist_ok=True)
         tau_table.to_csv(os.path.join(output_directory, 'tau_%d_exp.csv' % order), index=False)
+
+
+def plot_and_save_acorr_with_fit(path_to_fit_csv: str,
+                                 path_to_acorr_csv: str,
+                                 output_directory: str,
+                                 ) -> None:
+    os.makedirs(output_directory, exist_ok=True)
+    exp_order_acorrs_csv = glob(os.path.join(path_to_fit_csv, "*.csv"))
+    for tau_order_fit in sorted(exp_order_acorrs_csv):
+        name = os.path.basename(tau_order_fit).split(".")[0]
+        with PdfPages(os.path.join(output_directory, name + ".pdf")) as pdf:
+            csv_fit = os.path.join(path_to_fit_csv, name + ".csv")
+            fit = pd.read_csv(csv_fit)
+            for (ind, (_, fit_line)) in enumerate(tqdm(fit.iterrows(), desc="plot"), 3):
+                acorr_file = glob("{}/*{:02d}*.csv".format(path_to_acorr_csv, int(fit_line["rId"])))[0]
+                acorr_df = pd.read_csv(acorr_file)
+                time, acorr = acorr_df["time_ns"], acorr_df["acorr"]
+                graph_label = get_autocorr_graph_label(fit_line)
+                fig, ax = settings_plot(graph_label)
+                ax.set_title("Autocorrelation {rid} {rname}".format(
+                    rid=fit_line["rId"],
+                    rname=fit_line["rName"],
+                ))
+
+                ax.set_ylim(-0.1, 1.1)
+                ax.grid(color="grey", alpha=0.3)
+
+                amplitude = fit_line.filter(like='-a')
+                tau = fit_line.filter(like='-tau')
+                ax.plot(time, acorr)
+                ax.plot(time, __multi_exp_f(time, amplitude,
+                                            tau, C=0))
+
+                ax.axvline(fit_line["limit_ns"], color="palegreen", ls="--")
+
+                add_relpath_to_top_corner(fig)
+                pdf.savefig(fig)
+                plt.close(fig)
