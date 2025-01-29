@@ -8,7 +8,7 @@ from MDAnalysis.core.groups import Atom
 
 from process_utils.select import atom_pair_selecetor
 from process_utils.extract import WriteVectorsToCsv
-from process_utils.fit_rot_trans_ca import fit_rot_trans_ca
+from process_utils.fit_rot_trans_by_pattern import fit_rot_trans_by_pattern
 from process_utils.select import get_sec_str_pattern
 
 class OutputFilenameFormatter:
@@ -43,19 +43,6 @@ if __name__ == '__main__':
     # set xray reference to select CA atoms from secondary structure
     xray_reference = Universe(args.path_to_xray_reference)
 
-    # transform trajectory:
-    transforms = [
-        trans.NoJump(),
-        trans.center_in_box(u.atoms),
-        trans.wrap(u.atoms, compound='segments'),
-        fit_rot_trans_ca(u.atoms, ref)
-    ]
-    u.trajectory.add_transformations(*transforms)
-
-    # write coordinates of N-H vectors for residues of interest
-    first_rid, last_rid = args.residue_of_interest.split("-")
-    resids_of_interest = set(list(range(int(first_rid), int(last_rid) + 1)))
-
     # set pattern to select CA atoms from secondary structure
     chainids = []
     for segment in xray_reference.segments:
@@ -66,6 +53,19 @@ if __name__ == '__main__':
     selection_sec_str = get_sec_str_pattern(reference=xray_reference,
                                             cnain_ids=protein_chains)
     selection_sec_str_ca = f"name CA and {selection_sec_str}"
+    
+    # transform trajectory:
+    transforms = [
+        trans.NoJump(),
+        trans.center_in_box(u.atoms),
+        trans.wrap(u.atoms, compound='segments'),
+        fit_rot_trans_by_pattern(u.atoms, ref, pattern=selection_sec_str_ca)
+    ]
+    u.trajectory.add_transformations(*transforms)
+
+    # write coordinates of N-H vectors for residues of interest
+    first_rid, last_rid = args.residue_of_interest.split("-")
+    resids_of_interest = set(list(range(int(first_rid), int(last_rid) + 1)))
 
     # extract and write vectors in .csv
     WriteVectorsToCsv(ag=u.select_atoms(f"chainID {args.chain_name}"),
