@@ -1,6 +1,7 @@
 from typing import Iterable, Callable, List, Tuple, cast
 from MDAnalysis import Universe, AtomGroup
 from MDAnalysis.core.groups import Atom
+from MDAnalysis.analysis import dssp
 
 
 def atom_pair_selecetor(atom_name_1: str,
