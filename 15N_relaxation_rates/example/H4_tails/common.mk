@@ -8,6 +8,8 @@ TRAJECTORY_PATH:=../../../../short_example_trajectory/trajectory_AmberNetCDF/
 TRAJECTORY_REFERENCE_PATH:=../../../../short_example_trajectory/reference.pdb
 # set trajectory length
 TRAJECTORY_LENGTH:=10 # ns
+# set path to Xray reference pdb to sschoose secondary structure residues
+XRAY_REF=../../../../short_example_trajectory/3lz0.pdb
 # set type of trajectory files "nc" - AmberNetCDF, "xtc" - GromacsXtcFile
 FILETYPE:=nc
 # set pattern of trajectory files files: run00001.nc ---> "run%05d".nc

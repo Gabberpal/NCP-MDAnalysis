@@ -8,8 +8,8 @@ from MDAnalysis.core.groups import Atom
 
 from process_utils.select import atom_pair_selecetor
 from process_utils.extract import WriteVectorsToCsv
-from process_utils.fit_rot_trans_ca import fit_rot_trans_ca
-
+from process_utils.fit_rot_trans_by_pattern import fit_rot_trans_by_pattern
+from process_utils.select import get_sec_str_pattern
 
 class OutputFilenameFormatter:
     def __init__(self, output_directory):
@@ -25,6 +25,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Extract NH vectors')
     parser.add_argument('--path-to-trajectory', required=True)
     parser.add_argument('--path-to-trajectory-reference', required=True)
+    parser.add_argument('--path-to-xray-reference', required=True)
     parser.add_argument('--chain-name', required=True)
     parser.add_argument('--residue-of-interest', required=True)
     parser.add_argument('--filetype', choices=["nc", "xtc"], required=True)
@@ -39,12 +40,26 @@ if __name__ == '__main__':
     ref = Universe(args.path_to_trajectory_reference)
     u = Universe(args.path_to_trajectory_reference, traj)
 
+    # set xray reference to select CA atoms from secondary structure
+    xray_reference = Universe(args.path_to_xray_reference)
+
+    # set pattern to select CA atoms from secondary structure
+    chainids = []
+    for segment in xray_reference.segments:
+        chainids.extend([segment.segid] * segment.atoms.n_atoms)
+    xray_reference.add_TopologyAttr("chainIDs", chainids)
+
+    protein_chains = ["A", "B", "C", "D", "E", "F", "G", "H"]
+    selection_sec_str = get_sec_str_pattern(reference=xray_reference,
+                                            cnain_ids=protein_chains)
+    selection_sec_str_ca = f"name CA and {selection_sec_str}"
+    
     # transform trajectory:
     transforms = [
         trans.NoJump(),
         trans.center_in_box(u.atoms),
         trans.wrap(u.atoms, compound='segments'),
-        fit_rot_trans_ca(u.atoms, ref)
+        fit_rot_trans_by_pattern(u.atoms, ref, pattern=selection_sec_str_ca)
     ]
     u.trajectory.add_transformations(*transforms)
 
