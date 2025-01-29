@@ -25,6 +25,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Extract NH vectors')
     parser.add_argument('--path-to-trajectory', required=True)
     parser.add_argument('--path-to-trajectory-reference', required=True)
+    parser.add_argument('--path-to-xray-reference', required=True)
     parser.add_argument('--chain-name', required=True)
     parser.add_argument('--residue-of-interest', required=True)
     parser.add_argument('--filetype', choices=["nc", "xtc"], required=True)
