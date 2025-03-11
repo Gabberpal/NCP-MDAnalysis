@@ -36,7 +36,7 @@ def get_sec_str_pattern(reference: Universe,
                         ) -> str:
     """
     :param reference: srtucture to assign secondary-structured elements
-    :param chainIDs: list of chain names: ["A"] or ["A", "B"]
+    :param cnain_ids: list of chain names: ["A"] or ["A", "B"]
     :return: string pattern for selection of atoms from secondary structured regions in specified chains
     """
     sec_str_patterns = []
@@ -51,3 +51,16 @@ def get_sec_str_pattern(reference: Universe,
             sec_str_patterns.append(ss_selection)
 
     return f"({' or '.join(sec_str_patterns)})" if sec_str_patterns else ""
+
+
+def get_sec_str_ca_pattern(reference: Universe,
+                           cnain_ids: Iterable[str]
+                           ) -> str:
+    """
+    :param reference: srtucture to assign secondary-structured elements
+    :param cnain_ids: list of chain names: ["A"] or ["A", "B"]
+    :return: string pattern for selection of Ca atoms from secondary structured regions in specified chains
+    """
+    selection_sec_str = get_sec_str_pattern(reference=reference,
+                                            cnain_ids=cnain_ids)
+    return f"name CA and {selection_sec_str}"
