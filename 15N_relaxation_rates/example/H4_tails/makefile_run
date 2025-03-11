@@ -47,10 +47,8 @@ data/vectors/*.csv: $(strip ${SCRIPT_DIR})/extract_NH_vectors.py
 	python3 "$<" \
 	    --path-to-trajectory="$(strip ${TRAJECTORY_PATH})" \
 	    --path-to-trajectory-reference="$(strip ${TRAJECTORY_REFERENCE_PATH})" \
-	    --path-to-xray-reference="$(strip ${XRAY_REF})" \
 	    --chain-name="$(strip ${CHAIN_NAME})" \
 	    --residue-of-interest="$(strip ${RESIDUE_OF_INTEREST})" \
-	    --filetype="$(strip ${FILETYPE})" \
-	    --pattern="$(strip ${PATTERN})" \
 	    --trajectory-length="$(strip ${TRAJECTORY_LENGTH})" \
+	    --dt-ns="$(strip ${DT_NS})" \
 	    --output-directory=data/vectors/
