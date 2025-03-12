@@ -40,7 +40,7 @@ def _calc_R1(amplitude, taus_s, nmr_freq):
     rHX = 1.02e-10  # Distance between hydrogen and heteronucleus (m)
 
     # Calculate the dipolar coupling constant (d^2)
-    d2 = ((u0 / 4 / pi) * (h / 2 / pi) * (gH * gX) / (rHX**3)) ** 2
+    d2 = ((u0 / 4 / pi) * (h / 2 / pi) * (gH * gX) / (rHX ** 3)) ** 2
 
     # Calculate the ratio of gyromagnetic ratios (gamma_H / gamma_X)
     gHX = gH / gX
@@ -94,7 +94,7 @@ def _calc_R2(amplitude, taus_s, nmr_freq):
     rHX = 1.02e-10  # Distance between hydrogen and heteronucleus (m)
 
     # Calculate the dipolar coupling constant (d^2)
-    d2 = ((u0 / 4 / pi) * (h / 2 / pi) * (gH * gX) / (rHX**3)) ** 2
+    d2 = ((u0 / 4 / pi) * (h / 2 / pi) * (gH * gX) / (rHX ** 3)) ** 2
 
     # Calculate the ratio of gyromagnetic ratios (gamma_H / gamma_X)
     gHX = gH / gX
@@ -113,8 +113,8 @@ def _calc_R2(amplitude, taus_s, nmr_freq):
         taus_s = [taus_s]
 
     # Calculate the R2 relaxation rate using spectral density functions
-    R2 = 0.125 * d2 * (4 * J(0) + 3 * J(wX) + J(wH - wX) + 6 * J(wH) + 6 * J(wH + wX)) + \
-         (1.0 / 6.0) * c2 * (4 * J(0) + 3 * J(wX))
+    R2 = 0.125 * d2 * (4 * J(0) + 3 * J(wX) + J(wH - wX) + 6 * J(wH) + 6 * J(wH + wX)) + (1.0 / 6.0) * c2 * (
+                4 * J(0) + 3 * J(wX))
 
     return R2
 
@@ -211,7 +211,6 @@ def get_relaxition_rate(path_to_fit, nmr_freq, output_directory="./", rate="R1")
     df.to_csv(output_file, index=False)
 
     return df
-
 
 
 if __name__ == '__main__':

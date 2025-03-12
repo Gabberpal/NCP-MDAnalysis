@@ -19,9 +19,11 @@ def calc_and_save_acorr(path_to_vector_csv_files: Iterable[str],
                         acorr_func: Callable = calc_acorr_order_2,
                         out_dir: str = ".") -> None:
     """
-    This function calculates the autocorrelation function for a vector array stored in CSV files and saves the results to an output directory.
+    This function calculates the autocorrelation function for a vector array stored in CSV files and
+    saves the results to an output directory.
 
-    :param path_to_vector_csv_files: Path to a single CSV file or a list of CSV file paths containing the 3-dimensional vector arrays [N x 3].
+    :param path_to_vector_csv_files: Path to a single CSV file or a list of CSV file paths containing
+           the 3-dimensional vector arrays [N x 3].
     :param dt_ns: Time step (in nanoseconds) between consecutive data points in the vector array
     :param acorr_func_limit: The maximum lag (in terms of data points) for which the autocorrelation is stored.
                              If set to -1 (default), the autocorrelation is stored for all possible lags.
@@ -99,7 +101,7 @@ def fit_and_save_acorr_func(path_to_acorr_files: str,
         aa_name = file.split('-')[2]
         rname_list.append(aa_name)
 
-    # Iterate over bounds and fit autocorrelation functions    
+    # Iterate over bounds and fit autocorrelation functions
     for bound in bounds:
         tau_table = pd.DataFrame()
         for acorr_corr_file in tqdm(path_to_ccr_csv_files, desc=output_directory):

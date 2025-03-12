@@ -3,13 +3,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-
-
 def plot_and_save_rmsd(path_to_rmsd_dir: str,
                        output_directory: str = ".",
                        output_name: str = "rmsd.png"
                        ) -> None:
-
     # Указываем только один файл
     rmsd_column_names = {
         "rmsd_protein": "sec. struct. Cα",
@@ -18,7 +15,6 @@ def plot_and_save_rmsd(path_to_rmsd_dir: str,
         "rmsd_dna_inner": "DNA inner turn",
         "rmsd_dna_outer": "DNA outer turn"
     }
-
 
     SMALL_SIZE = 16
     MEDIUM_SIZE = 18
@@ -41,8 +37,6 @@ def plot_and_save_rmsd(path_to_rmsd_dir: str,
                            color=colors[ind], linewidth=1.0, label=label)
         if axis_limits is None:
             axis_limits = [0, df_rmsd["time_ns"].values[-1] + 10, 0, 14]
-
-
 
     for index in [0, 1]:
         axs[index].set(xlabel="time, ns", ylabel=r"RMSD, ${\rm\AA}$")
@@ -69,9 +63,3 @@ def plot_and_save_rmsd(path_to_rmsd_dir: str,
     os.makedirs(output_directory, exist_ok=True)
     plt.savefig(os.path.join(output_directory, output_name), bbox_inches="tight")
     plt.close()
-
-
-
-
-
-

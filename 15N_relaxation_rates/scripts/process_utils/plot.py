@@ -20,8 +20,8 @@ def get_autocorr_graph_label(fit_line):
              "A = <value> ; τ = <value>"
     """
     # Extract amplitude and tau values from the Series
-    amplitude = fit_line.filter(like='-a') # Filter keys containing '-a' (amplitudes)
-    tau = fit_line.filter(like='-tau') # Filter keys containing '-tau' (relaxation times)
+    amplitude = fit_line.filter(like='-a')  # Filter keys containing '-a' (amplitudes)
+    tau = fit_line.filter(like='-tau')  # Filter keys containing '-tau' (relaxation times)
 
     # Create a list of formatted strings for each amplitude-tau pair
     union_a_tau = ["{a_label:2s} = {a_value:5.3e} ; {tau_label:3s} = {tau_value: 8.3e}".format(
