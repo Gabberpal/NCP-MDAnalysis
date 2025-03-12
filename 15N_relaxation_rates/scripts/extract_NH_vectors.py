@@ -25,7 +25,7 @@ if __name__ == '__main__':
     parser.add_argument('--trajectory-start', default=0, type=int)
     parser.add_argument('--trajectory-length', required=True, type=int)
     parser.add_argument('--trajectory-stride', default=1, type=int)
-    parser.add_argument('--batch-size', default=1, type=int)
+    parser.add_argument('--batch-size', default=100, type=int)
     parser.add_argument('--dt-ns', type=float, default=0.01)
     parser.add_argument('--output-directory', default=".")
     parser.add_argument('--dna-chains', default=["I", "J"], type=list)
