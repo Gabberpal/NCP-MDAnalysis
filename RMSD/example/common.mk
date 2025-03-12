@@ -8,10 +8,6 @@ TRAJECTORY_PATH:=../../short_example_trajectory/trajectory_AmberNetCDF/
 TRAJECTORY_REFERENCE_PATH:=../../short_example_trajectory/reference.pdb
 # set trajectory length
 TRAJECTORY_LENGTH:=10 # ns
-# set type of trajectory files "nc" - AmberNetCDF, "xtc" - GromacsXtcFile
-FILETYPE:=nc
-# set pattern of trajectory files files: run00001.dat ---> "run%05d".dat
-PATTERN:=run%05d
 # set step of printing out coordinates in trajectory
 DT_NS=0.01 # time step of output for frame coordinates
 # set trajectory stride (DT_NS * TRAJECTORY_STRIDE is frequency of saving results)
