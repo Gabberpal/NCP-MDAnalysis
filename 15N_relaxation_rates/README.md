@@ -73,5 +73,6 @@ results are for demonstration purpose only and cannot be used for interpretation
    cd example/H4_tails 
    make
 ```
+See the [example_output](example_output)
 
 </div>
