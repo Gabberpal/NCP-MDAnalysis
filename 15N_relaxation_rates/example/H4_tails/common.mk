@@ -22,5 +22,5 @@ N_LAG_POINTS=100
 
 
 ## 4. specify experimental parameters needed for calculation
-NMR_FREQ=850e6 # Hz
+NMR_FREQ=1200e6 # Hz
 TUMBLING_TIME=163.4 # ns
