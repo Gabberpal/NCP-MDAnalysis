@@ -43,7 +43,7 @@ def calc_and_save_acorr(path_to_vector_csv_files: Iterable[str],
     for path_to_vector_file in tqdm(sorted(path_to_vector_csv_files)):
 
         out_name = os.path.basename(path_to_vector_file).split("_")[0]
-        vectors = pd.read_csv(path_to_vector_file).values
+        vectors = pd.read_csv(path_to_vector_file)[["x", "y", "z"]].values
         acorr = acorr_func(vectors)[:acorr_func_limit]
 
         # If this is the first file, initialize the time array
